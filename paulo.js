@@ -31,6 +31,7 @@ window.onload = function init() {
 
     // add the output of the renderer to an HTML element (this case, the body)
     document.body.appendChild(renderer.domElement);
+    const texturaMetalica = new THREE.TextureLoader().load ('./textures/texturaMetalica.jpg')
 
     robo = new THREE.Group();
     scene.add(robo)
@@ -41,13 +42,13 @@ window.onload = function init() {
     
 
     // Corpo
-    let corpoTexture = new THREE.TextureLoader().load ('./textures/corpo8.png');
+    let corpoTexture = new THREE.TextureLoader().load ('./textures/corpo.png');
     const corpo = new THREE.Mesh(
         new THREE.CylinderGeometry( 1, 1, 2.5, 20),
         new THREE.MeshBasicMaterial({map: corpoTexture},
         new THREE.MeshPhongMaterial({
             map: corpoTexture ,
-            // bumpMap: bumpmapTexture,
+            bumpMap: texturaMetalica,
             bumpScale: 2
         }))
     );
@@ -61,9 +62,15 @@ window.onload = function init() {
     corpo.add(pescoco);
 
     //cabeça
+    let cabecaTexture = new THREE.TextureLoader().load ('./textures/cabeca.png');
     const cabeca = new THREE.Mesh(
-        new THREE.SphereGeometry( 1, 20, 25),
-        new THREE.MeshLambertMaterial({color: "#049ef4", emissive: "#00304d"})
+        new THREE.SphereGeometry( 0.99, 20, 25),
+        new THREE.MeshBasicMaterial({map: cabecaTexture},
+            new THREE.MeshPhongMaterial({
+                map: cabecaTexture ,
+                bumpMap: texturaMetalica,
+                bumpScale: 2
+            }))
     );
     pescoco.add(cabeca);
 
@@ -72,10 +79,22 @@ window.onload = function init() {
         new THREE.SphereGeometry( 0.1, 20, 25),
         new THREE.MeshLambertMaterial({color: "#FF0000", emissive: "#FF0000"})
     )
-    olho.position.x = 0.25
-    olho.position.y = 0.40
-    olho.position.z = 0.82
+    olho.position.x = 0.27
+    olho.position.y = 0.42
+    olho.position.z = 0.85
     pescoco.add(olho);
+
+    // proteçao de olho
+    const protecaoOlho = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.15, 0.15, 0.15, 20),
+        new THREE.MeshLambertMaterial({color: "#049ef4", emissive: "#fff"})
+    )
+    protecaoOlho.position.x = 0.25
+    protecaoOlho.position.y = 0.40
+    protecaoOlho.position.z = 0.79
+    protecaoOlho.rotation.x = 70 * Math.PI / 180;
+    protecaoOlho.rotation.z = -15 * Math.PI / 180;
+    pescoco.add(protecaoOlho);
     
     // ligações
     ligacaoDireito = new THREE.Object3D();
@@ -91,7 +110,7 @@ window.onload = function init() {
     corpo.add(ligacaoEsquerdo);
 
     ligacaoCentral = new THREE.Object3D();
-    ligacaoCentral.position.y = -1.75;
+    ligacaoCentral.position.y = -1.70;
     ligacaoCentral.rotation.x = 20 * Math.PI / 180;
     corpo.add(ligacaoCentral);
 
@@ -104,8 +123,8 @@ window.onload = function init() {
         new THREE.MeshBasicMaterial({map: pernasTexture}),
         new THREE.MeshPhongMaterial({
             map: pernasTexture,
+            bumpMap: texturaMetalica,
             bumpScale: 2,
-            reapet: 2,
         })
     );
     pernaDireita.position.x = 0.5
@@ -117,8 +136,8 @@ window.onload = function init() {
         new THREE.MeshBasicMaterial({map: pernasTexture}),
         new THREE.MeshPhongMaterial({
             map: pernasTexture,
+            bumpMap: texturaMetalica,
             bumpScale: 2,
-            reapet: 2,
         })
     );
     pernaEsquerda.position.x = -0.5
@@ -130,8 +149,8 @@ window.onload = function init() {
         new THREE.MeshBasicMaterial({map: pernasTexture}),
         new THREE.MeshPhongMaterial({
             map: pernasTexture,
+            bumpMap: texturaMetalica, 
             bumpScale: 2,
-            reapet: 2,
         })
     );
     ligacaoCentral.add(pernaCentral);
@@ -162,22 +181,9 @@ window.onload = function init() {
     peCentral.position.y = -0.5
     ligacaoCentral.add(peCentral);
 
-    /*****************************
-     * ANIMATE 
-     * ***************************/
-    // set the animation function
     renderer.setAnimationLoop(render);
 }
 
-function resetarRotacao(){
-    if(robo.rotation.y / Math.PI * 180 >= 360 || robo.rotation.y / Math.PI * 180 <= -360){
-        robo.rotation.y = 0
-    }
-}
-
-/*****************************
-* ANIMATION FUNCTION 
-* ***************************/
 function render() {
     if(girarRobo){
         robo.rotation.y += rodar * 0.1
@@ -197,6 +203,8 @@ function render() {
         robo.position.y += saltar * 0.085
         ligacaoDireito.rotation.z += saltar * 0.01
         ligacaoEsquerdo.rotation.z -= saltar * 0.01
+        ligacaoCentral.rotation.x -= saltar * 0.01
+        pescoco.rotation.y -=  0.1
 
         if(robo.position.y.toFixed(1) == 1.5){
             saltar *= -1;
@@ -207,7 +215,14 @@ function render() {
         }
     }
     
-    robo.rotation.y += rodar *0.01
+    // robo.rotation.y += rodar *0.01
+    if(pescoco.rotation.y != 0){
+        pescoco.rotation.y -=  0.1
+        console.log(pescoco.rotation.y.toFixed(0) * 180 / Math.PI);
+        if(pescoco.rotation.y.toFixed(0) * 180 / Math.PI <= -360){
+            pescoco.rotation.y = 0
+        }
+    }
     
     if (cenarioRotacao){
         scene.rotation.x += 0.01
