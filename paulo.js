@@ -1,12 +1,12 @@
 import * as THREE from './libs/three.module.js';
 
 let camara, scene, renderer;
-let centro, ombroDireito, ombroEsquerdo, cotoveloDireito, cotoveloEsquerdo, ancaDireita, ancaEsquerda, joelhoDireito, joelhoEsquerdo; // PIVOTS (Object3D)
+let centro, ligacaoDireito, ligacaoEsquerdo, ligacaoCentral, pescoco// PIVOTS (Object3D)
+let robo;
+let rodar = -1
+let saltar = 1;
 
-let ombroDireitoRotacao = false;
-let ombroEsquerdoRotacao = false;
-let cotoveloDireitoRotacao = false;
-let cotoveloEsquerdoRotacao = false;
+let cenarioRotacao, cenarioRotacaoY, girarRobo, saltoRobo = false;
 
 // uma vez que tudo está carregado, executamos nosso material Three.js
 window.onload = function init() {
@@ -17,8 +17,9 @@ window.onload = function init() {
     // criar uma câmera, que define para onde estamos olhando
     const aspect = window.innerWidth / window.innerHeight;
     camara = new THREE.PerspectiveCamera(75, aspect, 0.1, 10);
+    camara.position.x = 0;
     camara.position.y = 2;
-    camara.position.z = 8;
+    camara.position.z = 7;
     camara.lookAt(scene.position); //aponte a câmera para o centro da cena
 
 
@@ -31,143 +32,135 @@ window.onload = function init() {
     // add the output of the renderer to an HTML element (this case, the body)
     document.body.appendChild(renderer.domElement);
 
-    const robo = new THREE.Group();
+    robo = new THREE.Group();
     scene.add(robo)
 
     centro = new THREE.Object3D();
+    centro.rotation.x = -20 * Math.PI / 180;
     robo.add(centro);
     
-    // show axes for the SHOULDER CS
-    let axesShoulder = new THREE.AxesHelper(4);
-    centro.add(axesShoulder);
 
     // Corpo
+    let corpoTexture = new THREE.TextureLoader().load ('./textures/corpo8.png');
     const corpo = new THREE.Mesh(
-        new THREE.BoxGeometry(1.5, 3.5, 1),
-        new THREE.MeshLambertMaterial({color: "#049ef4", emissive: "#00304d"})
+        new THREE.CylinderGeometry( 1, 1, 2.5, 20),
+        new THREE.MeshBasicMaterial({map: corpoTexture},
+        new THREE.MeshPhongMaterial({
+            map: corpoTexture ,
+            // bumpMap: bumpmapTexture,
+            bumpScale: 2
+        }))
     );
+    
     corpo.position.y = 1
     centro.add(corpo);
 
     //pescoço
-    const pescoco = new THREE.Mesh(
-        new THREE.BoxGeometry(0.75, 0.75, 0.75),
-        new THREE.MeshLambertMaterial({color: "#049ef4", emissive: "#00304d"}));
-    pescoco.position.y = 2
+    pescoco = new THREE.Object3D();
+    pescoco.position.y = 1.25
     corpo.add(pescoco);
 
     //cabeça
     const cabeca = new THREE.Mesh(
-        new THREE.BoxGeometry(1.25, 1, 1),
-        new THREE.MeshLambertMaterial({color: "#049ef4", emissive: "#00304d"}));
-    cabeca.position.y = 2.5
-    corpo.add(cabeca);
-    
-    // Ombros
-    ombroDireito = new THREE.Object3D();
-    ombroDireito.position.x = 0.75;
-    ombroDireito.position.y = 1.5;
-    corpo.add(ombroDireito);
-    
-    ombroEsquerdo = new THREE.Object3D();
-    ombroEsquerdo.position.x = -0.75;
-    ombroEsquerdo.position.y = 1.5;
-    corpo.add(ombroEsquerdo);
-
-    // Antebraços
-    const anteBracoDireito = new THREE.Mesh(
-        new THREE.BoxGeometry(0.5, 1.5, 1),
-        new THREE.MeshLambertMaterial({color: "#049ef4", emissive: "#00304d"}),
-    );
-    anteBracoDireito.position.x = 0.25
-    anteBracoDireito.position.y = -0.5
-    ombroDireito.add(anteBracoDireito);
-
-    const anteBracoEsquerdo = new THREE.Mesh(
-        new THREE.BoxGeometry(0.5, 1.5, 1),
-        new THREE.MeshLambertMaterial({color: "#049ef4", emissive: "#00304d"}),
-    );
-    anteBracoEsquerdo.position.x = -0.25
-    anteBracoEsquerdo.position.y = -0.5
-    ombroEsquerdo.add(anteBracoEsquerdo);
-
-    // cotovelo
-    cotoveloDireito = new THREE.Object3D();
-    ombroDireito.add(cotoveloDireito);
-    cotoveloDireito.position.y = -1.51;
-    cotoveloDireito.position.x = 0.25
-
-    cotoveloEsquerdo = new THREE.Object3D();
-    ombroEsquerdo.add(cotoveloEsquerdo);
-    cotoveloEsquerdo.position.y = -1.51;
-    cotoveloEsquerdo.position.x = -0.25
-
-    // Braços
-    const bracoDireito = new THREE.Mesh(
-        new THREE.BoxGeometry(0.5, 1.5, 1),
-        new THREE.MeshLambertMaterial({color: "#049ef4", emissive: "#00304d"}),
-    );
-    bracoDireito.position.y = -0.5
-    cotoveloDireito.add(bracoDireito);
-
-    const bracoEsquerdo = new THREE.Mesh(
-        new THREE.BoxGeometry(0.5, 1.5, 1),
-        new THREE.MeshLambertMaterial({color: "#049ef4", emissive: "#00304d"}),
-    );
-    bracoEsquerdo.position.y = -0.5
-    cotoveloEsquerdo.add(bracoEsquerdo);
-
-    //Anca
-    ancaDireita = new THREE.Object3D();
-    corpo.add(ancaDireita);
-    ancaDireita.position.y = -1
-
-    ancaEsquerda = new THREE.Object3D();
-    corpo.add(ancaEsquerda);
-    ancaEsquerda.position.y = -1
-
-    //ante pernas
-    const antePernaDireita = new THREE.Mesh(
-        new THREE.BoxGeometry(0.65, 1.25, 1),
+        new THREE.SphereGeometry( 1, 20, 25),
         new THREE.MeshLambertMaterial({color: "#049ef4", emissive: "#00304d"})
     );
-    antePernaDireita.position.x = 0.43
-    antePernaDireita.position.y = -1.25
-    ancaDireita.add(antePernaDireita);
+    pescoco.add(cabeca);
 
-    const antePernaEsquerda = new THREE.Mesh(
-        new THREE.BoxGeometry(0.65, 1.25, 1),
-        new THREE.MeshLambertMaterial({color: "#049ef4", emissive: "#00304d"})
-    );
-    antePernaEsquerda.position.x = -0.43
-    antePernaEsquerda.position.y= -1.25
-    ancaEsquerda.add(antePernaEsquerda);
+    //olho
+    const olho = new THREE.Mesh(
+        new THREE.SphereGeometry( 0.1, 20, 25),
+        new THREE.MeshLambertMaterial({color: "#FF0000", emissive: "#FF0000"})
+    )
+    olho.position.x = 0.25
+    olho.position.y = 0.40
+    olho.position.z = 0.82
+    pescoco.add(olho);
+    
+    // ligações
+    ligacaoDireito = new THREE.Object3D();
+    ligacaoDireito.position.x = 0.75;
+    ligacaoDireito.position.y = 1;
+    ligacaoDireito.rotation.x = 20 * Math.PI / 180;
+    corpo.add(ligacaoDireito);
+    
+    ligacaoEsquerdo = new THREE.Object3D();
+    ligacaoEsquerdo.position.x = -0.75;
+    ligacaoEsquerdo.position.y = 1;
+    ligacaoEsquerdo.rotation.x = 20 * Math.PI / 180;
+    corpo.add(ligacaoEsquerdo);
 
-    // Joelhos
-    joelhoDireito = new THREE.Object3D();
-    ancaDireita.add(joelhoDireito);
-    joelhoDireito.position.y = -1.5;
-
-    joelhoEsquerdo = new THREE.Object3D();
-    ancaEsquerda.add(joelhoEsquerdo);
-    joelhoEsquerdo.position.y = -1.5;
+    ligacaoCentral = new THREE.Object3D();
+    ligacaoCentral.position.y = -1.75;
+    ligacaoCentral.rotation.x = 20 * Math.PI / 180;
+    corpo.add(ligacaoCentral);
 
     //pernas
+    const geometriaPerna = new THREE.CylinderGeometry( 0.3, 0.5, 2.5, 20);
+    let pernasTexture = new THREE.TextureLoader().load ('./textures/Pernas.png');
+
     const pernaDireita = new THREE.Mesh(
-        new THREE.BoxGeometry(0.65, 1, 1),
-        new THREE.MeshLambertMaterial({color: "#049ef4", emissive: "#00304d"})
+        geometriaPerna,
+        new THREE.MeshBasicMaterial({map: pernasTexture}),
+        new THREE.MeshPhongMaterial({
+            map: pernasTexture,
+            bumpScale: 2,
+            reapet: 2,
+        })
     );
-    pernaDireita.position.x = 0.43
-    pernaDireita.position.y = -0.85
-    joelhoDireito.add(pernaDireita);
+    pernaDireita.position.x = 0.5
+    pernaDireita.position.y = -1.75
+    ligacaoDireito.add(pernaDireita);
 
     const pernaEsquerda = new THREE.Mesh(
-        new THREE.BoxGeometry(0.65, 1, 1),
-        new THREE.MeshLambertMaterial({color: "#049ef4", emissive: "#00304d"})
+        geometriaPerna,
+        new THREE.MeshBasicMaterial({map: pernasTexture}),
+        new THREE.MeshPhongMaterial({
+            map: pernasTexture,
+            bumpScale: 2,
+            reapet: 2,
+        })
     );
-    pernaEsquerda.position.x = -0.43
-    pernaEsquerda.position.y= -0.85
-    joelhoEsquerdo.add(pernaEsquerda);
+    pernaEsquerda.position.x = -0.5
+    pernaEsquerda.position.y= -1.75
+    ligacaoEsquerdo.add(pernaEsquerda);
+
+    const pernaCentral = new THREE.Mesh(
+        new THREE.CylinderGeometry( 0.25, 0.45, 1.15, 20),
+        new THREE.MeshBasicMaterial({map: pernasTexture}),
+        new THREE.MeshPhongMaterial({
+            map: pernasTexture,
+            bumpScale: 2,
+            reapet: 2,
+        })
+    );
+    ligacaoCentral.add(pernaCentral);
+
+    // pés
+    const geometriaPe = new THREE.SphereGeometry( 0.45, 20, 25);
+
+    const peDireito = new THREE.Mesh(
+        geometriaPe,
+        new THREE.MeshLambertMaterial({color: "#049ef4", emissive: "#049ef4"})
+    );
+    peDireito.position.x = 0.5
+    peDireito.position.y = -2.95
+    ligacaoDireito.add(peDireito);
+
+    const peEsquerdo = new THREE.Mesh(
+        geometriaPe,
+        new THREE.MeshLambertMaterial({color: "#049ef4", emissive: "#049ef4"})
+    );
+    peEsquerdo.position.x = -0.5
+    peEsquerdo.position.y = -2.95
+    ligacaoEsquerdo.add(peEsquerdo);
+
+    const peCentral = new THREE.Mesh(
+        new THREE.SphereGeometry( 0.40, 20, 25),
+        new THREE.MeshLambertMaterial({color: "#049ef4", emissive: "#049ef4"})
+    );
+    peCentral.position.y = -0.5
+    ligacaoCentral.add(peCentral);
 
     /*****************************
      * ANIMATE 
@@ -176,21 +169,51 @@ window.onload = function init() {
     renderer.setAnimationLoop(render);
 }
 
+function resetarRotacao(){
+    if(robo.rotation.y / Math.PI * 180 >= 360 || robo.rotation.y / Math.PI * 180 <= -360){
+        robo.rotation.y = 0
+    }
+}
+
 /*****************************
 * ANIMATION FUNCTION 
 * ***************************/
 function render() {
-    if(ombroDireitoRotacao && (ombroDireito.rotation.z <= 90 / 180 * Math.PI)) {
-        ombroDireito.rotation.z += 0.01
+    if(girarRobo){
+        robo.rotation.y += rodar * 0.1
+
+        if ((robo.rotation.y / Math.PI * 180).toFixed(0) >= 360 || (robo.rotation.y / Math.PI * 180).toFixed(0) <= -360){
+            robo.rotation.y = 0
+            girarRobo = false;
+        }
     }
-    if(ombroEsquerdoRotacao && (ombroEsquerdo.rotation.z >= -90 / 180 * Math.PI)) {
-        ombroEsquerdo.rotation.z -= 0.01
+    else{
+        if((robo.rotation.y / Math.PI * 180).toFixed(0) == -45 || (robo.rotation.y / Math.PI * 180).toFixed(0) == 45){
+            rodar *= -1
+        }
     }
-    if(cotoveloDireitoRotacao && (cotoveloDireito.rotation.z <= 90 / 180 * Math.PI)) {
-        cotoveloDireito.rotation.z += 0.01
+
+    if (saltoRobo){
+        robo.position.y += saltar * 0.085
+        ligacaoDireito.rotation.z += saltar * 0.01
+        ligacaoEsquerdo.rotation.z -= saltar * 0.01
+
+        if(robo.position.y.toFixed(1) == 1.5){
+            saltar *= -1;
+        }
+        else if(robo.position.y <= 0){
+            saltar *= -1;
+            saltoRobo = false;
+        }
     }
-    if(cotoveloEsquerdoRotacao && (cotoveloEsquerdo.rotation.z >= -90 / 180 * Math.PI)) {
-        cotoveloEsquerdo.rotation.z -= 0.01
+    
+    robo.rotation.y += rodar *0.01
+    
+    if (cenarioRotacao){
+        scene.rotation.x += 0.01
+    }
+    if (cenarioRotacaoY){
+        scene.rotation.y += 0.01
     }
 
     // render the scene into viewport using the camera
@@ -202,32 +225,25 @@ function render() {
 * KEYBOARD EVENTS 
 * ***************************/
 document.addEventListener("keydown", event => {
-    if (event.key == 'f'){
-        ombroDireitoRotacao = true;
-    }
     if (event.key == 's'){
-        ombroEsquerdoRotacao = true;
+        cenarioRotacao = true;
     }
-    
-    if (event.key == 'd') {
-        cotoveloDireitoRotacao = true;
+    if (event.key == 'a'){
+        cenarioRotacaoY = true;
     }
-    if (event.key == 'a') {
-        cotoveloEsquerdoRotacao = true;
+    if (event.key == 'w'){
+        girarRobo = true;
+    }
+    if (event.key == ' '){
+        saltoRobo = true;
     }
 })
 
 document.addEventListener("keyup", event => {
-    if (event.key == 'f'){
-        ombroDireitoRotacao = false;
-    }
     if (event.key == 's'){
-        ombroEsquerdoRotacao = false;
+        cenarioRotacao = false;
     }
-    if (event.key == 'd') {
-        cotoveloDireitoRotacao = false;
-    }
-    if (event.key == 'a') {
-        cotoveloEsquerdoRotacao = false;
+    if (event.key == 'a'){
+        cenarioRotacaoY = false;
     }
 })
