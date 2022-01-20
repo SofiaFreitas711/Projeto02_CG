@@ -9,11 +9,25 @@
         body { /* settings for body to use the complete page */
         margin: 0; overflow: hidden;
         }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: left;
+            z-index: 100;
+            display:block;
+            color: white;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        }
+        span{
+            font-weight: bold;
+            font-size: 20pt;
+        }
     </style>
     <script type="module" src="script.js"></script>
-    <script type="module" src="paulo.js"></script>
+    <!-- <script type="module" src="paulo.js"></script> -->
 </head>
 <body>
-    
+    <div id="info"><span>Welcome to Robot Party Simulator</span><br>Press Key: 'Space' to jump or 'W' to spin your blue buddy<br> Press Key: 'I' to dance or 'L' to spin the pink buddiella<br> Press Key: '' the little green fellow <br> Use Key '' to enjoy every movement at the same time <br><span>Let´s Get this party started!!!</span></div>
 </body>
 </html>
