@@ -5,7 +5,7 @@ let camera, scene, renderer;
 let paredeDireita, paredeEsquerda, paredeFundo, teto, chao;
 
 // Sofia Freitas
-let roboRosa, bracoDireito, bracoEsq,ombroDir,antBracoDir, ombroEsq, antBracoEsq, centro, pirueta, pointLight1, pointLight2, pointLight3;
+let ombroDir, ombroEsq, antBracoEsq, centro, pirueta;
 let rodarCorpo = false;
 let bracosCima = false;
 let valor = 0.01;
@@ -40,7 +40,6 @@ window.onload = function init() {
     //criação da cena
     scene = new THREE.Scene();
 
-
     //definições da camara
     const aspect = window.innerWidth / window.innerHeight;
     camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 10);
@@ -62,7 +61,6 @@ window.onload = function init() {
         sound.play();
     });
 
-
     //criação do render/cena
     renderer = new THREE.WebGLRenderer({ antialias: false }); // aliasing (jagged edges when rendering)
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -71,11 +69,6 @@ window.onload = function init() {
 
     // add the output of the renderer to an HTML element (this case, the body)
     document.body.appendChild(renderer.domElement);
-
-    // Luzes
-    // const light = new THREE.AmbientLight( 'White' );
-    // light.intensity = 0.9 // soft white light
-    // scene.add( light );
 
     let pointLight1 = new THREE.PointLight("DarkRed");
     pointLight1.position.set(10,10,10);
@@ -139,20 +132,6 @@ window.onload = function init() {
     bola.position.y = 3.2
     scene.add( bola );
 
-    //mesa de DJ retirado do sketchfab
-    // function mesa(){
-    //     const loader = new GLTFLoader();
-
-    //     loader.load( 'mesa/scene.gltf', function ( gltf ) {
-    //         const mesa = gltf.scene;
-    //         mesa.scale.set(3,2,0);
-    //         mesa.position.x = -3;
-    //         scene.add( mesa );
-
-    //     });
-    // }
-    
-    // mesa();
     const mesaDJ = new THREE.BoxGeometry(5,3,1);
     let textureMesa = new THREE.TextureLoader().load ('./textures/mesaDJ.png');
     const materialMesa = new THREE.MeshPhongMaterial( { map: textureMesa } );
@@ -180,7 +159,7 @@ window.onload = function init() {
     colunaObj2.rotation.y = -0.5
     scene.add( colunaObj2 );
     
-    // Robozinho da ganda Fifi <3
+    // Sofia Freitas
     const roboRosa = new THREE.Group()
 
     //corpo
@@ -710,6 +689,8 @@ function render() {
             jumpRobotJump = false;
         }
     }
+
+    
     
     // render the scene into viewport using the camera
     renderer.render(scene, camera);
@@ -741,6 +722,14 @@ document.addEventListener("keydown", event => {
         jumpRobotJump = true;
     }
 
+    if (event.key == 'b'){
+        bracosCima = true;
+        rodarCorpo = true;
+        pirueta = true;
+        girarRobo = true;
+        danceRobotDance = true;
+    }
+
 })
 
 document.addEventListener("keyup", event => {
@@ -752,6 +741,13 @@ document.addEventListener("keyup", event => {
         pirueta = false;
     }
     if (event.key == " ") {
+        danceRobotDance = false;
+    }
+    if (event.key == 'b'){
+        bracosCima = false;
+        rodarCorpo = false;
+        pirueta = false;
+        girarRobo = false;
         danceRobotDance = false;
     }
 })
