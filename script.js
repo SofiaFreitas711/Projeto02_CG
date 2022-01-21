@@ -246,11 +246,10 @@ window.onload = function init() {
 
 
     // Parte do Paulo Rodrigues
-    const texturaMetalica = new THREE.TextureLoader().load ('./textures/texturaMetalica.jpg')
-
     robo = new THREE.Group();
-    robo.position.y = -2
-    robo.position.x = -5
+    robo.position.x = -5;
+    robo.position.y = -2;
+    robo.position.z = 0.5;
     scene.add(robo)
 
     centroR2D2 = new THREE.Object3D();
@@ -261,12 +260,7 @@ window.onload = function init() {
     let corpoTexture = new THREE.TextureLoader().load ('./textures/corpo.png');
     const corpo = new THREE.Mesh(
         new THREE.CylinderGeometry( 1, 1, 2.5, 20),
-        new THREE.MeshBasicMaterial({map: corpoTexture},
-        new THREE.MeshPhongMaterial({
-            map: corpoTexture ,
-            bumpMap: texturaMetalica,
-            bumpScale: 2
-        }))
+        new THREE.MeshLambertMaterial({map: corpoTexture})
     );
     
     corpo.position.y = 1
@@ -281,12 +275,7 @@ window.onload = function init() {
     let cabecaTexture = new THREE.TextureLoader().load ('./textures/cabeca.png');
     const cabecaR2D2 = new THREE.Mesh(
         new THREE.SphereGeometry( 0.99, 20, 25),
-        new THREE.MeshBasicMaterial({map: cabecaTexture},
-            new THREE.MeshPhongMaterial({
-                map: cabecaTexture ,
-                bumpMap: texturaMetalica,
-                bumpScale: 2
-            }))
+        new THREE.MeshLambertMaterial({map: cabecaTexture}),
     );
     pescoco.add(cabecaR2D2);
 
@@ -336,12 +325,7 @@ window.onload = function init() {
 
     const pernaDireita = new THREE.Mesh(
         geometriaPerna,
-        new THREE.MeshBasicMaterial({map: pernasTexture}),
-        new THREE.MeshPhongMaterial({
-            map: pernasTexture,
-            bumpMap: texturaMetalica,
-            bumpScale: 2,
-        })
+        new THREE.MeshLambertMaterial({map: pernasTexture}),
     );
     pernaDireita.position.x = 0.5
     pernaDireita.position.y = -1.75
@@ -349,12 +333,7 @@ window.onload = function init() {
 
     const pernaEsquerda = new THREE.Mesh(
         geometriaPerna,
-        new THREE.MeshBasicMaterial({map: pernasTexture}),
-        new THREE.MeshPhongMaterial({
-            map: pernasTexture,
-            bumpMap: texturaMetalica,
-            bumpScale: 2,
-        })
+        new THREE.MeshLambertMaterial({map: pernasTexture}),
     );
     pernaEsquerda.position.x = -0.5
     pernaEsquerda.position.y= -1.75
@@ -362,12 +341,7 @@ window.onload = function init() {
 
     const pernaCentral = new THREE.Mesh(
         new THREE.CylinderGeometry( 0.25, 0.45, 1.15, 20),
-        new THREE.MeshBasicMaterial({map: pernasTexture}),
-        new THREE.MeshPhongMaterial({
-            map: pernasTexture,
-            bumpMap: texturaMetalica, 
-            bumpScale: 2,
-        })
+        new THREE.MeshLambertMaterial({map: pernasTexture}),
     );
     ligacaoCentral.add(pernaCentral);
 
